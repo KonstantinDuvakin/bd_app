@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/KonstantinDuvakin/bd_app/internal/auth"
 	"github.com/KonstantinDuvakin/bd_app/internal/database"
 	"github.com/google/uuid"
 )
@@ -37,18 +36,6 @@ func (ac *apiConfig) createUser(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusCreated, dbUserToUser(user))
 }
 
-func (ac *apiConfig) getUser(w http.ResponseWriter, r *http.Request) {
-	apiKey, err := auth.GetAPIKey(r.Header)
-
-	if err != nil {
-		respondWithError(w, http.StatusForbidden, "no API key")
-	}
-
-	user, err := ac.DB.GetUser(r.Context(), apiKey)
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Invalid request payload")
-		return
-	}
-
+func (ac *apiConfig) getUser(w http.ResponseWriter, r *http.Request, user database.User) {
 	respondWithJSON(w, http.StatusOK, dbUserToUser(user))
 }
