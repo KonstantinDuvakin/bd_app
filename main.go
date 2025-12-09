@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/KonstantinDuvakin/bd_app/internal/database"
 	"github.com/go-chi/chi"
@@ -40,9 +41,12 @@ func main() {
 		log.Fatal("Cannot connect to database")
 	}
 
+	db := database.New(conn)
 	apiConf := apiConfig{
-		DB: database.New(conn),
+		DB: db,
 	}
+
+	go startScraping(db, 10, time.Minute)
 
 	router := chi.NewRouter()
 
@@ -60,6 +64,7 @@ func main() {
 	routerV1.Get("/err", handlerError)
 	routerV1.Post("/user", apiConf.createUser)
 	routerV1.Get("/user", apiConf.middlewareAuth(apiConf.getUser))
+	routerV1.Get("/user/posts", apiConf.middlewareAuth(apiConf.getPostsForUser))
 
 	routerV1.Post("/feeds", apiConf.middlewareAuth(apiConf.createFeed))
 	routerV1.Get("/feeds", apiConf.getAllFeeds)

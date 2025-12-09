@@ -39,3 +39,15 @@ func (ac *apiConfig) createUser(w http.ResponseWriter, r *http.Request) {
 func (ac *apiConfig) getUser(w http.ResponseWriter, r *http.Request, user database.User) {
 	respondWithJSON(w, http.StatusOK, dbUserToUser(user))
 }
+
+func (ac *apiConfig) getPostsForUser(w http.ResponseWriter, r *http.Request, user database.User) {
+	posts, err := ac.DB.GetPostsForUser(r.Context(), database.GetPostsForUserParams{
+		UserID: user.ID,
+		Limit:  5,
+	})
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Error fetching posts")
+	}
+
+	respondWithJSON(w, http.StatusOK, dbPostsToPosts(posts))
+}
